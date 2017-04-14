@@ -108,7 +108,7 @@ public class Graphe {
 		Sommet[] sousTab= sousVecteur(s,i,j);
 		int n= sousTab.length;
 		
-		Sommet[] res= new Sommet[s.length];
+		//Sommet[] res= new Sommet[s.length];
 		
 		for (int k=0;k<i;i++){
 			res[k]=s[k];
