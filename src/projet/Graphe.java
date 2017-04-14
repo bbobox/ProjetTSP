@@ -13,9 +13,10 @@ public class Graphe {
 	ArrayList<Sommet> ordeSommet;   		// Liste de sommet 
 	ArrayList<Integer> listeDistance;
 	Sommet[] ordreSommet; 				 // tableau d'ordre de sommet
-	ArrayList<Sommet> listSolution;
+	ArrayList<Sommet[]> listSolution;
+	ArrayList<Boolean> listSolutionBool;
 	
-	int[][] distance;// tableau de distances entre les villes 
+	float[][] distance;// tableau de distances entre les villes 
 	 
 			/**
 			 * Constructeur du graphe: en fonction du vecteur de sommet en paramètre la solution au depart 
@@ -25,9 +26,19 @@ public class Graphe {
 		//ordeSommet=new ArrayList<Sommet>();
 		nbS=m.length;
 		ordreSommet=m;
+		listSolutionBool= new ArrayList<Boolean>();
 		
-		distance=new int[nbS][nbS];
-		listSolution= new ArrayList<Sommet>();
+		/* Initialisation mise à jour de la matrice de Distance entre les sommets */
+		distance=new float[nbS][nbS];
+		for(int i=0;i<nbS;i++){
+			for (int j=0;j<nbS;j++){
+				Sommet a=m[i];
+				Sommet b=m[j];
+				distance[i][j]= distanceEuclidienne(a,b);
+			}
+		}
+		
+		listSolution= new ArrayList<Sommet[]>();
 	}	
 	
 	public float distanceEuclidienne(Sommet x, Sommet y){
@@ -146,6 +157,69 @@ public class Graphe {
 		
 	}
 	
+	/** Calcul de distance total d'un solution 
+	 * 
+	 */
+	
+	public float distanceTot(Sommet[] s){
+		float res=(float) 0;
+		int n=s.length;
+		for(int i=0;i<n-1;i++){
+			
+			res=+res+distanceEuclidienne(s[i], s[i+1]);
+		}		
+		return res;
+	}
+	
+	
+	/**
+	 * Recherche de solution: Cass Mono-Objectif
+	 */
+	
+	public Sommet[] monoObjectifTsp(){
+		listSolution.add(ordreSommet); // ajout de notre solution initial dans la liste de solution
+		listSolutionBool.add(false);
+		
+		int i=0;
+		while(i<listSolution.size()){
+			Sommet sol[]=listSolution.get(i);
+			float resSol=distanceTot(sol);
+			int n= sol.length;
+			for (int j=0;j<n-1;j++){
+				for (int k=j+1;k<n;k++){
+					Sommet[] i_2opt=opt2(j,k, sol);
+					if( distanceTot(i_2opt)>resSol){
+						listSolution.add(i_2opt);
+					}
+					//afficheOrdreSommet(i_2opt);
+					//System.out.println();
+				}	
+			}
+			i++;
+			
+	
+		}
+	
+		int tailleList= listSolution.size();
+		 int iRes=0;
+		 float valRes=distanceTot(listSolution.get(0));
+		 for(int ind=0;ind<tailleList;ind++){
+			 float d= distanceTot(listSolution.get(ind));
+			 if (d>valRes){
+				 valRes=d;
+				 iRes=ind;
+			 }
+			 
+		 }
+			
+		 Sommet[] res=listSolution.get(iRes);
+		
+		 return res;
+		
+		
+	}
+	
+
 	
 	
 	
