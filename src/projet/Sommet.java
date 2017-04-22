@@ -30,7 +30,8 @@ public class Sommet {
 		 */
 	
 	public void afficheSommet(){
-		System.out.print("("+xPos+","+yPos+")");
+		//System.out.print("("+xPos+","+yPos+")");
+		System.out.print("("+indice+")");
 		
 	}
 	
