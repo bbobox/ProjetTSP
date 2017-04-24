@@ -24,7 +24,6 @@ public class Graphe {
 			 * @param m
 			 */
 	public Graphe(Sommet[] m){
-		//ordeSommet=new ArrayList<Sommet>();
 		nbS=m.length;
 		ordreSommet=m;
 		listSolutionBool= new ArrayList<Boolean>();
@@ -141,7 +140,7 @@ public class Graphe {
 	
 	
 	 /**
-	  * Fonction de calcul de 2_opt 
+	  * Fonction de calcul de 2_opt ( en fonction d'une solution et  indive de sommet/villes)
 	  * */
 	
 	
@@ -178,6 +177,11 @@ public class Graphe {
 	}
 	
 	
+	/**
+	 * Affichage de la liste de solution voisine par la methode 2-opt
+	 * 
+	 */
+	
 	public void liste2_opt(Sommet[] s){
 		
 		int n= s.length;
@@ -195,7 +199,7 @@ public class Graphe {
 		
 	}
 	
-	/** Calcul de distance total d'un solution 
+	/** Calcul du distance/cout d'une solution  
 	 * 
 	 */
 	
@@ -211,8 +215,9 @@ public class Graphe {
 	}
 	
 	
+	
 	/**
-	 * Recherche de solution: Cass Mono-Objectif
+	 * Recherche de solution: Cas Mono-Objectif
 	 */
 	
 	public Sommet[] monoObjectifTsp(){
@@ -228,10 +233,6 @@ public class Graphe {
 			//System.out.print("i="+i+" ->");
 			Sommet[] sol=listSolution.get(i);
 			
-			//System.out.print("solution"+i+" ->");
-			//afficheOrdreSommet(sol);
-			//System.out.println(">"+distanceTot(sol)+  "	Sa liste de solution voisine");
-			
 			float resSol=distanceTot(sol);
 			//System.out.println("sol="+resSol+" ->");
 			int n= sol.length;
@@ -244,54 +245,18 @@ public class Graphe {
 					Sommet[] i_2opt=opt2(j,k, sol);
 					Sommet a= i_2opt[0];
 					i_2opt[n-1]=a;
-					//System.out.print("	");
-					// afficheOrdreSommet(i_2opt);
-					// System.out.println("	");
 					if( distanceTot(i_2opt)<distanceTot(bestVoisin)){
-						//System.out.println("f voisin:"+distanceTot(i_2opt)+"  f_actuel:"+distanceTot(bestVoisin));
-						//listSolution.add(i_2opt);
-						//System.out.println("taille="+listSolution.size()+"  i="+i);
+					
 						bestVoisin=i_2opt;
 						test=true;
-						//System.out.println("nouveau voisin ->"+distanceTot(bestVoisin));
-						//afficheOrdreSommet(i_2opt);
-						//System.out.println("> "+distanceTot(i_2opt));
 					}
-					//afficheOrdreSommet(i_2opt);
-					//System.out.println();
+					
 				}	
 			}
 			if(test==true){
 				listSolution.add(bestVoisin);
-				//System.out.println("Ajout de >>>>>  "+distanceTot(bestVoisin));
 			}
 			i++;
-			
-			
-			/*int j=0;
-			boolean ok=true;
-			while(j<n && ok==true){
-				int k=j+1;
-				while(k<n-1 && ok==true){
-					Sommet[] i_2opt=opt2(j,k, sol);
-					Sommet a= i_2opt[0];
-					i_2opt[n-1]=a;
-					i
-					if( distanceTot(i_2opt)<resSol){
-						System.out.println("f voisin:"+distanceTot(i_2opt)+"  f_actuel:"+resSol);
-						listSolution.add(i_2opt);
-						ok=false;
-						//System.out.println("taille="+listSolution.size()+"  i="+i+"");
-					}
-					else{
-						System.out.println("f voisin:"+distanceTot(i_2opt)+"  f_actuel:"+resSol);
-					}
-					k++;
-	
-				}
-				j++;
-			}
-			i++; */
 		}
 			
 		int tailleList= listSolution.size();
@@ -316,8 +281,7 @@ public class Graphe {
 	
 	public float[] fonctionObjectif(Sommet[] sol){
 		float[] f1f2= new float[2];
-		/*calcul de sur la fonction abjectif 1)
-		 */
+		/*calcul de sur la fonction bjectif 1*/
 		float res1= (float)0;
 		float res2= (float)0;
 		for(int i=0;i<sol.length-1;i++){
@@ -342,7 +306,7 @@ public class Graphe {
 	
 	
 	/**
-	 *  Suppression des solutions dominées
+	 *  Suppression des solutions dominées (multiObjectif)
 	 */
 	
 	public  ArrayList<Sommet[]> suppressionSol( ArrayList<Sommet[]> listSol){
@@ -378,127 +342,183 @@ public class Graphe {
 	}
 	
 	
-	public ArrayList<Sommet[]> multObjectif(Sommet[] sol1, Sommet[] sol2){
+	
+
+	/**
+	 *  Suppression des solutions dominées et renvoie une liste de solution non dominées
+	 */
+	
+	public  ArrayList<Solution> suppressionDomine( ArrayList<Solution> listSol){
+		ArrayList<float[]> valFonction= new ArrayList<float[]>();
+		ArrayList<Solution> res= new ArrayList<Solution>();
+		
+		int nbSol= listSol.size();
+		for(int i=0;i<nbSol;i++){
+			valFonction.add(fonctionObjectif(listSol.get(i).sol));
+		}
+		
+		for (int i=0;i<nbSol;i++){
+			Sommet[] solI= listSol.get(i).sol;
+			// On le compare d'indice aux autres solutions de la liste pour savoir si elle est dmoninée
+			int j =0;
+			boolean test=false;
+			
+			float[] f1f2I=valFonction.get(i);
+			while(j<nbSol && test==false){
+				
+				float[] f1f2J=valFonction.get(j);
+				if( (i!=j) &&(( f1f2J[0]<= f1f2I[0] && f1f2J[1]<f1f2I[1]) || (( f1f2J[0]< f1f2I[0] && f1f2J[1]<=f1f2I[1])))){
+					test=true;
+				}
+				j++;
+			}
+		
+			if(test==false){ /* On ajoute la solution à la liste si elle n'est pas dominée*/
+				res.add(listSol.get(i));
+			
+			}
+			
+		}
+		
+		return res; /* renvoie la liste des solution non dominée */
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	public ArrayList<Solution> multObjectif(Sommet[] sol1, Sommet[] sol2){
 		ArrayList<Sommet[]> listSolutionNonDomine= new ArrayList<Sommet[]>();
 		ArrayList<float[]> valeurFonctionObjectif= new ArrayList<float[]>(); 
 		
+		
+		
+
 		listSolutionNonDomine.add(sol1);
 		valeurFonctionObjectif.add(fonctionObjectif(sol1));
 		
-		Sommet[] SolutionOptimal;
 		
-		/*
-		while(listSolutionNonDomine.isEmpty()==false){ // Tant que la liste de  nouvelle solution non dominée est non vide 
-			// Pour chaque solution in construit ses solutions vosine 
-			ArrayList<Sommet[]> ListeVoisin= new ArrayList<Sommet[]>();
-			int taille=listSolutionNonDomine.size();
-			float[] minF1F2=fonctionObjectif(listSolutionNonDomine.get(0));
-			for (int i=0;i<taille;i++){
-				Sommet[] solI=listSolutionNonDomine.get(i); // On recupère la soslution d'indice I
-				
-				int n= solI.length;
-				for (int j=0;j<n-1;j++){
-					for (int k=j+1;k<n;k++){
-						Sommet[] i_2opt=opt2(j,k,solI);
-						ListeVoisin.add(i_2opt);  //Ajout des voisins à la liste de solution voisine
-						float[]iF1F2=fonctionObjectif(i_2opt);
-						valeurFonctionObjectif.add(iF1F2);
-						if (iF1F2[0]<minF1F2[0]); minF1F2[0]=iF1F2[0];
-						if (iF1F2[1]<minF1F2[1]); minF1F2[1]=iF1F2[1];
-						
-
-					}
-					
-					
-				}
-				
-				
-			}
-			// Suppression des solutions dominées
-		 int nbVoisin=ListeVoisin.size();
-		 ArrayList<Sommet[]> nonDomineIntermediaire=new ArrayList<Sommet[]>();
-		 for (int i=0;i<nbVoisin;i++){
-			 float[] i_f1f2= valeurFonctionObjectif.get(i);
-			 if (i_f1f2[0]<minF1F2[0] || i_f1f2[0]<minF1F2[0]){
-				 nonDomineIntermediaire.add(ListeVoisin.get(i));
-			 }
-			 
-			 
-		 }
-			
-		}
 		
-		**/
+	
+		
+		//Sommet[] SolutionOptimal;
 		
 		// Calcul des solutons voisines
-		ArrayList<Sommet[]> ListeVoisin= new ArrayList<Sommet[]>();
-		ArrayList<Sommet[]> ListeSol= new ArrayList<Sommet[]>();
-		int taille=listSolutionNonDomine.size();
 		
-		for (int i=0;i<taille;i++){
-			Sommet[] solI=listSolutionNonDomine.get(i); // On recupère la solution d'indice I
-			float[] solIObjctifs=fonctionObjectif(solI);
-			int n= solI.length;
-			ListeVoisin.add(solI);
-			ListeSol.add(solI);
-			for (int j=0;j<n-1;j++){
-				for (int k=j+1;k<n;k++){
-					Sommet[] i_2opt=opt2(j,k,solI);
+		
+		ArrayList<Solution> listeSolutionNonDomine= new ArrayList<Solution>();
+		//ArrayList<Solution> valeurFonctionObjectif= new ArrayList<Solution>(); 
+		Solution s1= new Solution(sol1);
+		listeSolutionNonDomine.add(s1);
+		ArrayList<Solution> ListVoisin= new ArrayList<Solution>();
+		ArrayList<Solution> ListSol= new ArrayList<Solution>();
+		int tailleSol= listeSolutionNonDomine.size();
+		
+		/* METHODE */
+		
+		ArrayList<Solution> ListVoisinI= new ArrayList<Solution>();
+		ArrayList<Solution> ListSolI;
+		
+		int cptVoisin=0;
+		
+		for (int i=0;i<tailleSol;i++){
+			Solution solI=listeSolutionNonDomine.get(i); // On recupère la solution d'indice I
+			float[] solIObjctifs=fonctionObjectif(solI.sol);
+			int n= solI.sol.length;
+			solI.visiteSolution(); // On ele marque comme deja parcouru
+			Solution voisin= new Solution(solI.sol);
+			ListSolI= new ArrayList<Solution>();
+			ListVoisinI= new ArrayList<Solution>();
+			ListSolI.add(solI);
+			cptVoisin++;   // MAJ du compteur
+			for (int j=0;j<n;j++){
+				for (int k=j+1;k<n-1;k++){
+					Sommet[] i_2opt=opt2(j,k,solI.sol);
+					Sommet a= i_2opt[0];
+					i_2opt[n-1]=a;
 					float[]iF1F2=fonctionObjectif(i_2opt);
-					
-					if( iF1F2[0]<=solIObjctifs[0] || iF1F2[1]<=solIObjctifs[1]){
-						ListeVoisin.add(i_2opt);  //Ajout des voisins à la liste de solution voisine
-						ListeSol.add(i_2opt);
-					}
-					
+					voisin= new Solution(i_2opt);
+					ListSolI.add(voisin);
 
 				}
 				
 				
 			}
+			// recupere les voisins dominés
+			ListSolI= suppressionDomine(ListSolI);
+			
+			//Ajout des solution obtenu dans ListSol
+			int nb=ListSolI.size();
+			for(int id=0;id<nb;id++){
+				ListSol.add(ListSolI.get(id));
+			}
 			
 			
 		}
+		listeSolutionNonDomine= suppressionDomine(ListSol);
 		
 		
-		listSolutionNonDomine= suppressionSol(ListeSol); // On filtre pour recuperer la liste des solution non dominées
-		
-		while(ListeVoisin.isEmpty()==false){ // tant que la liste des voisins est non vide
-			ListeVoisin= new ArrayList<Sommet[]>();
-			ListeSol=new ArrayList<Sommet[]>();
-			taille=listSolutionNonDomine.size();
+		// Tant qu'il y de nouvelles solution dominé
+		while(cptVoisin>0){
+			ListVoisin= new ArrayList<Solution>();
+			ListSol= new ArrayList<Solution>();
 			
-			for (int i=0;i<taille;i++){
-				Sommet[] solI=listSolutionNonDomine.get(i); // On recupère la solution d'indice I
-				float[] solIObjctifs=fonctionObjectif(solI);
-				int n= solI.length;
-				ListeSol.add(solI);
-				for (int j=0;j<n-1;j++){
-					for (int k=j+1;k<n;k++){
-						Sommet[] i_2opt=opt2(j,k,solI);
-						float[]iF1F2=fonctionObjectif(i_2opt);
-						
-						if( iF1F2[0]<=solIObjctifs[0] || iF1F2[1]<=solIObjctifs[1]){
-							ListeVoisin.add(i_2opt);  //Ajout des voisins à la liste de solution voisine
-							ListeSol.add(i_2opt);
-							System.out.print("Solution ajoutée:");
-							afficheOrdreSommet(i_2opt);
-							System.out.println("f1:"+iF1F2[0]+" f2:"+iF1F2[1]);
-							
+			ListVoisinI= new ArrayList<Solution>();
+			
+			
+			
+			tailleSol= listeSolutionNonDomine.size();
+			cptVoisin=0;
+			for (int i=0;i<tailleSol;i++){
+				Solution solI=listeSolutionNonDomine.get(i); // On recupère la solution d'indice I
+				float[] solIObjctifs=fonctionObjectif(solI.sol);
+				int n= solI.sol.length;
+				//ListVoisin.add(solI);
+				solI.visiteSolution();
+				ListVoisinI= new ArrayList<Solution>();
+				ListSolI= new ArrayList<Solution>();
+				ListSolI.add(solI);
+				
+				if (solI.visite==false){
+					cptVoisin++;
+					Solution voisin= new Solution(solI.sol);
+					ListSolI= new ArrayList<Solution>();
+					ListVoisinI= new ArrayList<Solution>();
+					solI.visiteSolution(); // On le marque deja parcouru
+					for (int j=0;j<n;j++){
+						for (int k=j+1;k<n-1;k++){
+							Sommet[] i_2opt=opt2(j,k,solI.sol);
+							Sommet a= i_2opt[0];
+							i_2opt[n-1]=a;
+							float[]iF1F2=fonctionObjectif(i_2opt);
+							voisin= new Solution(i_2opt);
+							ListVoisinI.add(voisin);
+							ListSolI.add(voisin);
+
 						}
 						
-
+						
 					}
+				}
+					// recupere les voisins dominés
+				ListSolI= suppressionDomine(ListSolI);
 					
-					
+					//Ajout des solution obtenu dans ListSol
+				int nb=ListSolI.size();
+				for(int id=0;id<nb;id++){
+					ListSol.add(ListSolI.get(id));
 				}
 				
-				
 			}
-			listSolutionNonDomine= suppressionSol(ListeSol);
+				//Supressio des solution non domine
+				listeSolutionNonDomine= suppressionDomine(ListSol);		
 		}
-	
-		return listSolutionNonDomine;
+		
+		
+		return listeSolutionNonDomine;
 	}
 		
 		
@@ -510,6 +530,8 @@ public class Graphe {
 	
 	
 	public static void main (String[] args){
+		
+		/* Test Simple
 		  
 		 Sommet A0= new Sommet(1380, 939,0);
 		 Sommet B1= new Sommet(2848, 96,1);
@@ -525,6 +547,7 @@ public class Graphe {
 		//2, 1, 7, 3, 4, 6, 8, 5, 0, 2
 		 
 		 Sommet[] t= {C2,B1,H7,D3,E4,G6,I8,F5,A0,C2};
+		 Sommet[] t1= {A0,B1,C2,D3,E4,F5,G6,H7,I8,A0};
 		 
 		 Sommet A= new Sommet(1,4,0);
 		 Sommet B= new Sommet(2,6,1);
@@ -532,29 +555,30 @@ public class Graphe {
 		 
 		 Sommet[] t2= {A,B,C,A};
 		 
-		 Graphe F1= new Graphe(t2);
-		 System.out.println(F1.distanceTot(t2));
+		 Graphe F1= new Graphe(t1);
+		// System.out.println(F1.distanceTot(t2));
 		 
 		// F1.liste2_opt(t);
 		  
-		 /*Sommet[] l1=F1.opt2(1,4, t);
+		 Sommet[] l1=F1.opt2(1,4, t);
 				 F1.afficheOrdreSommet(t);
 				 System.out.println();
 				 System.out.println();
 				 System.out.println(); 
-				 F1.afficheOrdreSommet(l1);*/
+				 F1.afficheOrdreSommet(l1);
 		
 				 
 		
 		  
 				 
-		/*Sommet[]tsp= F1.monoObjectifTsp();
+		Sommet[]tsp= F1.monoObjectifTsp();
 		System.out.print("solution optimal");
 		F1.afficheOrdreSommet(tsp);
-		System.out.println("->"+F1.distanceTot(tsp)); */
+		System.out.println("->"+F1.distanceTot(tsp)); 
 		
 		 //Math.sqrt(a+b);
-		 System.out.println( Math.sqrt(2)); 
+		// System.out.println( Math.sqrt(2)); 
+		*/
 	  }
 	
 	

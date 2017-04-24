@@ -40,12 +40,14 @@ public class TestTsp{
 	        		}
 	        		
 	        		
-	        		
+	        
+	        	
 	        	int nbS=ordre.size();
-	        	ordreSommet= new Sommet[nbS];
+	        	ordreSommet= new Sommet[nbS+1];
 	        	for (int i=0;i<nbS;i++){
 	        		ordreSommet[i]=ordre.get(i);
 	        	}
+	        	ordreSommet[nbS]=ordre.get(0);
 	        	
 	        	Graphe solDepart= new Graphe(ordreSommet);
 	        		Sommet[] optiMono= solDepart.monoObjectifTsp();
@@ -81,7 +83,6 @@ public class TestTsp{
 		
 		 try{
 	        	Lecteur1=new BufferedReader(new  FileReader(file1));
-	        	//Pattern p= Pattern.compile();
 	        	Pattern p = Pattern.compile("\\d+ \\d+ \\d+");
 	        	
 	        	while ((ligne1 = Lecteur1.readLine()) != null){
@@ -91,8 +92,6 @@ public class TestTsp{
 	        			String[] arc=ligne1.split(" ");
 	        			Sommet s= new Sommet(Integer.parseInt(arc[1]), Integer.parseInt(arc[2]), Integer.parseInt(arc[0])-1);
 	        			ordre1.add(s);
-	        			//s.afficheSommet();
-	        			//System.out.println("->"+s.indice);
 	        			
 	        			}
 	        		}
@@ -105,8 +104,6 @@ public class TestTsp{
 	        			String[] arc=ligne2.split(" ");
 	        			Sommet s= new Sommet(Integer.parseInt(arc[1]), Integer.parseInt(arc[2]), Integer.parseInt(arc[0])-1);
 	        			ordre2.add(s);
-	        			//s.afficheSommet();
-	        			//System.out.println("->"+s.indice);
 	        			
 	        			}
 	        		}
@@ -116,21 +113,27 @@ public class TestTsp{
 	        		
 	        		
 	        	int nbS=ordre1.size();
-	        	ordreSommet1= new Sommet[nbS];
+	        	ordreSommet1= new Sommet[nbS+1];
 	        	for (int i=0;i<nbS;i++){
 	        		ordreSommet1[i]=ordre1.get(i);
 	        	}
+	        	ordreSommet1[nbS]=ordre1.get(0);
 	        	
-	        	ordreSommet2= new Sommet[nbS];
+	        	ordreSommet2= new Sommet[nbS+1];
 	        	for (int i=0;i<nbS;i++){
 	        		ordreSommet2[i]=ordre2.get(i);
 	        	}
-	        	
+	        	ordreSommet2[nbS]=ordre2.get(0);
 	        		
 	        	Graphe solDepart= new Graphe(ordreSommet1,ordreSommet2);
-	        	ArrayList<Sommet[]> res=solDepart.multObjectif(ordreSommet1,ordreSommet2);
-	        	solDepart.afficheOrdreSommet(res.get(0));
-
+	        	ArrayList<Solution> res=solDepart.multObjectif(ordreSommet1,ordreSommet2);
+	        	
+	        	System.out.println("Affichage des solution non Dominiés: Ensemble de solutions:");
+	        	int taille= res.size();
+	        	for(int i=0;i<taille;i++){
+	        		solDepart.afficheOrdreSommet(res.get(i).sol); 
+	        		System.out.println("f1="+solDepart.fonctionObjectif((res.get(i).sol))[0]+ "f2="+solDepart.fonctionObjectif(res.get(i).sol)[1] );
+	        		}
 	        	
 	        	}catch (FileNotFoundException f) {
 	    			f.printStackTrace();
@@ -151,9 +154,20 @@ public class TestTsp{
    
    public static void main(String[] args) {
 	    TestTsp t1= new TestTsp();
-	    t1.monoObjectif("kroA100.tsp"); /* lancement de la fonction de test */
+	   String  nomFichier="kroA100.tsp";
+	   System.out.println("		****** TSP monoObjectif sur  "+ nomFichier+"*********" );
+	    t1.monoObjectif(nomFichier); /* lancement de la fonction de test */
 	    
-	   /// t1.multiObjectif("kroA100.tsp", "kroB100.tsp");
+	   
+	    String  nomFichier1="kroA100.tsp";
+	    String  nomFichier2="kroB100.tsp";
+	    System.out.println();
+	    System.out.println();
+	    
+	    System.out.println("		****** TSP MultiObjectif sur  "+ nomFichier1+" et "+ nomFichier2+"*************");
+	    
+	   
+	    t1.multiObjectif(nomFichier1, nomFichier2);
 	   
    
    }
